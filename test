@@ -1,6 +1,5 @@
 import subprocess
 import re
-from tabulate import tabulate
 
 # Run the 'netsh wlan show profiles' command and retrieve the output
 command_output = subprocess.run(["netsh", "wlan", "show", "profiles"], capture_output=True).stdout.decode()
@@ -40,12 +39,28 @@ if len(profile_names) != 0:
             wifi_list.append(wifi_profile)
 
 # Format the retrieved Wi-Fi profile information into a table
-table_headers = ["SSID", "Password"]
-table_data = []
+table_rows = []
 for wifi_profile in wifi_list:
     ssid = wifi_profile["ssid"]
     password = wifi_profile["password"]
-    table_data.append([ssid, password])
+    table_row = "| {:<20} | {:<20} |".format(ssid, password)
+    table_rows.append(table_row)
 
-# Print the table
-print(tabulate(table_data, headers=table_headers, tablefmt="grid"))
+# Determine the maximum length of each column
+max_ssid_length = max(len(wifi_profile["ssid"]) for wifi_profile in wifi_list)
+max_password_length = max(len(wifi_profile["password"] or "") for wifi_profile in wifi_list)
+
+# Generate the table separator line
+table_separator = "+{}+{}+".format("-" * (max_ssid_length + 2), "-" * (max_password_length + 2))
+
+# Print the table headers
+print(table_separator)
+print("| {:<20} | {:<20} |".format("SSID", "Password"))
+print(table_separator)
+
+# Print the table rows
+for table_row in table_rows:
+    print(table_row)
+
+# Print the table footer
+print(table_separator)
