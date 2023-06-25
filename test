@@ -1,5 +1,6 @@
 import subprocess
 import re
+from tabulate import tabulate
 
 # Run the 'netsh wlan show profiles' command and retrieve the output
 command_output = subprocess.run(["netsh", "wlan", "show", "profiles"], capture_output=True).stdout.decode()
@@ -38,6 +39,13 @@ if len(profile_names) != 0:
             # Append the wifi_profile dictionary to the wifi_list
             wifi_list.append(wifi_profile)
 
-# Print the retrieved Wi-Fi profile information in MySQL-like format
+# Format the retrieved Wi-Fi profile information into a table
+table_headers = ["SSID", "Password"]
+table_data = []
 for wifi_profile in wifi_list:
-    print("INSERT INTO wifi_profiles (ssid, password) VALUES ('{}', '{}');".format(wifi_profile["ssid"], wifi_profile["password"]))
+    ssid = wifi_profile["ssid"]
+    password = wifi_profile["password"]
+    table_data.append([ssid, password])
+
+# Print the table
+print(tabulate(table_data, headers=table_headers, tablefmt="grid"))
