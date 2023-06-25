@@ -2,6 +2,8 @@ import subprocess
 import os
 import re
 
+os.system("cls"
+
 try:
     from tabulate import tabulate
     tabulate_available = True
