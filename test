@@ -38,29 +38,15 @@ if len(profile_names) != 0:
             # Append the wifi_profile dictionary to the wifi_list
             wifi_list.append(wifi_profile)
 
-# Format the retrieved Wi-Fi profile information into a table
-table_rows = []
+# Print the retrieved Wi-Fi profile information in a tree-like structure
+def print_wifi_profile(profile, level=0):
+    ssid = profile["ssid"]
+    password = profile["password"]
+    indent = "|   " * level
+    print("{}|- SSID: {}".format(indent, ssid))
+    print("{}   |- Password: {}".format(indent, password))
+    print("{}   |-".format(indent))
+
+print("Wi-Fi Profiles:")
 for wifi_profile in wifi_list:
-    ssid = wifi_profile["ssid"]
-    password = wifi_profile["password"]
-    table_row = "| {:<20} | {:<20} |".format(ssid, password)
-    table_rows.append(table_row)
-
-# Determine the maximum length of each column
-max_ssid_length = max(len(wifi_profile["ssid"]) for wifi_profile in wifi_list)
-max_password_length = max(len(wifi_profile["password"] or "") for wifi_profile in wifi_list)
-
-# Generate the table separator line
-table_separator = "+{}+{}+".format("-" * (max_ssid_length + 2), "-" * (max_password_length + 2))
-
-# Print the table headers
-print(table_separator)
-print("| {:<20} | {:<20} |".format("SSID", "Password"))
-print(table_separator)
-
-# Print the table rows
-for table_row in table_rows:
-    print(table_row)
-
-# Print the table footer
-print(table_separator)
+    print_wifi_profile(wifi_profile)
