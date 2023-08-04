@@ -9,54 +9,49 @@ try:
     tabulate_available = True
 except ModuleNotFoundError:
     tabulate_available = False
-    print("Error: Module 'tabulate' is not installed. Please install it using 'pip3 install tabulate'.")
+    print("Error: Modul 'tabulate' tidak terpasang. Silakan pasang dengan menggunakan 'pip3 install tabulate'.")
 
-# Check if tabulate is available
 if tabulate_available:
-    # Run the 'netsh wlan show profiles' command and retrieve the output
     command_output = subprocess.run(["netsh", "wlan", "show", "profiles"], capture_output=True).stdout.decode()
+    profile_names = re.findall("Semua Nama Profil Pengguna : (.*)\r", command_output)
 
-    # Find the Wi-Fi profile names from the output using regular expression
-    profile_names = re.findall("All User Profile     : (.*)\r", command_output)
+    daftar_wifi = []
 
-    # Empty list to store Wi-Fi profile information
-    wifi_list = []
-
-    # Check if any Wi-Fi profiles are found
     if len(profile_names) != 0:
         for name in profile_names:
-            wifi_profile = {}  # Create an empty dictionary to store Wi-Fi profile information
+            profil_wifi = {}  # Buat kamus kosong untuk menyimpan informasi profil Wi-Fi
             profile_info = subprocess.run(["netsh", "wlan", "show", "profile", name], capture_output=True).stdout.decode()
 
-            # Check if the Wi-Fi profile has a security key or not
-            if re.search("Security key           : Absent", profile_info):
-                continue  # Continue to the next Wi-Fi profile if it doesn't have a security key
+            # Periksa apakah profil Wi-Fi memiliki kunci keamanan atau tidak
+            if re.search("Kunci Keamanan           : Tidak Ada", profile_info):
+                continue  # Lanjut ke profil Wi-Fi berikutnya jika tidak memiliki kunci keamanan
             else:
-                # Store the SSID name of the Wi-Fi profile in the wifi_profile dictionary
-                wifi_profile["ssid"] = name
+                # Simpan nama SSID dari profil Wi-Fi dalam kamus profil_wifi
+                profil_wifi["ssid"] = name
 
-                # Get the complete information of the Wi-Fi profile, including the password
+                # Dapatkan informasi lengkap profil Wi-Fi, termasuk kata sandi
                 profile_info_pass = subprocess.run(["netsh", "wlan", "show", "profile", name, "key=clear"], capture_output=True).stdout.decode()
 
-                # Search for the password using regular expression
-                password = re.search("Key Content            : (.*)\r", profile_info_pass)
+                # Cari kata sandi menggunakan ekspresi reguler
+                password = re.search("Konten Kunci            : (.*)\r", profile_info_pass)
 
-                # Store the password in the wifi_profile dictionary, or None if no password is found
+                # Simpan kata sandi dalam kamus profil_wifi, atau None jika tidak ada kata sandi yang ditemukan
                 if password is None:
-                    wifi_profile["password"] = None
+                    profil_wifi["password"] = None
                 else:
-                    wifi_profile["password"] = password[1]
+                    profil_wifi["password"] = password[1]
 
-                # Append the wifi_profile dictionary to the wifi_list
-                wifi_list.append(wifi_profile)
+                # Tambahkan kamus profil_wifi ke daftar_wifi
+                daftar_wifi.append(profil_wifi)
 
-    # Format the retrieved Wi-Fi profile information into a table
-    table_headers = ["SSID", "Password"]
-    table_data = []
-    for wifi_profile in wifi_list:
-        ssid = wifi_profile["ssid"]
-        password = wifi_profile["password"]
-        table_data.append([ssid, password])
+    # Format informasi profil Wi-Fi yang diambil menjadi tabel
+    header_tabel = ["SSID", "Kata Sandi"]
+    data_tabel = []
+    for profil_wifi in daftar_wifi:
+        ssid = profil_wifi["ssid"]
+        password = profil_wifi["password"]
+        data_tabel.append([ssid, password])
 
-    # Print the table
-    print(tabulate(table_data, headers=table_headers, tablefmt="grid"))
+    # Cetak tabel
+    print(tabulate(data_tabel, headers=header_tabel, tablefmt="grid"))
+    
